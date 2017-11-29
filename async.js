@@ -11,6 +11,7 @@ exports.runParallel = runParallel;
 function runParallel(jobs, parallelNum, timeout = 1000) {
     return new Promise(resolve => {
         var result = [];
+        var next = 0;
         if(jobs.length <= 0){
             resolve(result);
         }
@@ -19,6 +20,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         indexedJobs.slice(0, parallelNum).map(startJob);
 
         function startJob(task){
+            next++;
             var dealer = res => End(res, task)
             task.job().then(dealer).catch(dealer);
         }
@@ -28,9 +30,9 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             if(result.length === indexedJobs.length){
                 resolve(result);
             } 
-
-            if(task.index < indexedJobs.length) {
-                startJob(indexedJobs[++task.index]);
+            
+            if(next < indexedJobs.length) {
+                startJob(indexedJobs[next]);
             }
         }
     });
