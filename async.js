@@ -1,6 +1,6 @@
 'use strict';
 
-exports.isStar = true;
+exports.isStar = false;
 exports.runParallel = runParallel;
 
 /** Функция паралелльно запускает указанное число промисов
@@ -11,17 +11,15 @@ exports.runParallel = runParallel;
 function runParallel(jobs, parallelNum, timeout = 1000) {
     return new Promise(resolve => {
         var result = [];
-        var next = 0;
         if(jobs.length <= 0){
             resolve(result);
         }
 
         var indexedJobs = jobs.map((job, index) => ({job, index}));
         indexedJobs.slice(0, parallelNum).map(startJob);
-        console.info(indexedJobs);
+
 
         function startJob(task){
-            next++;
             var dealer = res => End(res, task)
             task.job().then(dealer).catch(dealer);
         }
@@ -31,9 +29,9 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             if(result.length === indexedJobs.length){
                 resolve(result);
             } 
-            
-            if(next < indexedJobs.length) {
-                startJob(indexedJobs[next]);
+
+            if(task.index < indexedJobs.length) {
+                startJob(indexedJobs[++task.index]);
             }
         }
     });
