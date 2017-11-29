@@ -18,7 +18,6 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         var indexedJobs = jobs.map((job, index) => ({job, index}));
         indexedJobs.slice(0, parallelNum).map(startJob);
 
-
         function startJob(task){
             var dealer = res => End(res, task)
             task.job().then(dealer).catch(dealer);
