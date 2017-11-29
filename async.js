@@ -11,25 +11,30 @@ exports.runParallel = runParallel;
 function runParallel(jobs, parallelNum, timeout = 1000) {
     return new Promise(resolve => {
         var result = [];
-        var completedJob = 0;
+        var next = 0;
         if(jobs.length <= 0){
             resolve(result);
         }
 
-        var indexedJobs = jobs.map((job, index) => {return {job, index};});
-        indexedJobs.map(startJob).slice(0, parallelNum);
+        var indexedJobs = jobs.map((job, index) => ({job, index}));
+        indexedJobs.slice(0, parallelNum).map(startJob);
+        console.info(indexedJobs);
 
         function startJob(task){
+            next++;
             var dealer = res => End(res, task)
             task.job().then(dealer).catch(dealer);
         }
 
         function End(res, task) {
-            ++completedJob;
             result[task.index] = res;
-            if(completedJob === indexedJobs.length){
+            if(result.length === indexedJobs.length){
                 resolve(result);
             } 
+            
+            if(next < indexedJobs.length) {
+                startJob(indexedJobs[next]);
+            }
         }
     });
 }
